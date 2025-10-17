@@ -1,7 +1,7 @@
 # Grenbi Lite
 #### Video Demo: <URL HERE>
 #### Description:
-**Grenbi Lite** is a minimal, CS50-style prototype of my startup concept, **Grenbi** — an AI‑assisted nutritionist and vegetarian/vegan recipe recommender. This project focuses on a lightweight web application that suggests plant‑based meals tailored to user preferences (diet, goal, cuisine) while excluding allergens or disliked ingredients. It demonstrates end‑to‑end fundamentals covered in CS50: Python, data handling (CSV), basic scoring logic, and a web front‑end with HTML/CSS.
+**Grenbi Lite** is a minimal, CS50-style prototype of my startup concept, **Grenbi**,  an AI‑assisted nutritionist and vegetarian/vegan recipe recommender. This project focuses on a lightweight web application that suggests plant‑based meals tailored to user preferences (diet, goal, cuisine) while excluding allergens or disliked ingredients. It demonstrates end‑to‑end fundamentals covered in CS50: Python, data handling (CSV), basic scoring logic, and a web front‑end with HTML/CSS.
 
 ### What the App Does
 Users choose:
