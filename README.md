@@ -1,7 +1,7 @@
 # Grenbi Lite (Student-First)
 #### Video Demo: <URL HERE>
 #### Description:
-**Grenbi Lite** is my final project for **CS50x**, inspired by my startup idea, **Grenbi** — an AI-assisted nutritionist and plant-based meal recommender.  
+**Grenbi Lite** is my final project for **CS50x**, inspired by my startup idea, **Grenbi**, an AI-assisted nutritionist and plant-based meal recommender.  
 This lightweight web app helps users find **personalized vegetarian and vegan recipes** based on their **diet**, **nutrition goal**, **preferred cuisine**, and **allergens**.
 
 Unlike the earlier limited demo, this version allows users to search for **any cuisine worldwide** (e.g., Persian, Mexican, Korean, Greek, Thai, etc.) — showing how Grenbi’s concept can adapt to every culture and food preference.
