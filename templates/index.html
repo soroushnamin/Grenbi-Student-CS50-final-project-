@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Grenbi Lite — CS50 Final Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <h1>Grenbi Lite</h1>
+      <p class="subtitle">Personalized vegetarian & vegan recipe suggestions (demo)</p>
+
+      <form method="POST" class="card">
+        <label>Diet
+          <select name="diet">
+            <option value="">Any</option>
+            <option value="vegan">Vegan</option>
+            <option value="vegetarian">Vegetarian</option>
+          </select>
+        </label>
+
+        <label>Goal
+          <select name="goal">
+            <option value="balanced">Balanced</option>
+            <option value="weight_loss">Weight Loss</option>
+            <option value="muscle_gain">Muscle Gain</option>
+          </select>
+        </label>
+
+        <label>Cuisine
+          <select name="cuisine">
+            <option value="">Any</option>
+            <option value="turkish">Turkish</option>
+            <option value="indian">Indian</option>
+            <option value="italian">Italian</option>
+            <option value="asian">Asian</option>
+          </select>
+        </label>
+
+        <label>Exclude (allergens / dislikes)
+          <input type="text" name="exclude" placeholder="e.g., gluten, peanut, soy">
+        </label>
+
+        <button type="submit">Find Recipes</button>
+      </form>
+
+      {% if recipes %}
+      <section class="results">
+        <h2>Recommendations</h2>
+        {% for r in recipes[:12] %}
+          <article class="recipe card">
+            <h3>{{ r["title"] }}</h3>
+            <p class="muted">{{ r["diet"]|title }} • {{ r["cuisine"]|title }}</p>
+            <ul class="facts">
+              <li>Calories: {{ r["calories"] }}</li>
+              <li>Protein: {{ r["protein_g"] }} g</li>
+              <li>Fiber: {{ r["fiber_g"] }} g</li>
+              <li>Score: {{ r["score"] }}</li>
+            </ul>
+            <p>{{ r["summary"] }}</p>
+            <p class="muted">Allergens: {{ r["allergens"] or "None" }}</p>
+            {% if r["url"] %}
+            <p><a href="{{ r["url"] }}" target="_blank" rel="noopener">View Recipe</a></p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </section>
+      {% endif %}
+
+      {% if not recipes %}
+      <p class="muted">Use the form above to get personalized suggestions.</p>
+      {% endif %}
+    </main>
+  </body>
+</html>

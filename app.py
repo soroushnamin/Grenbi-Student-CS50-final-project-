@@ -1,0 +1,91 @@
+"""
+Grenbi Lite - CS50 Final Project
+Author: Soroush Aliasghari Namin
+GitHub: soroushnamin
+edX: soroushnamin
+City/Country: Istanbul, Turkey
+Date: 17/10/2025
+
+Notes on AI assistance:
+- Portions of this scaffold (project structure, boilerplate code, and comments) were assisted by ChatGPT in 2025.
+- All design, customization, dataset curation, and final implementation decisions were made by the author.
+"""
+
+from flask import Flask, render_template, request
+import pandas as pd
+from pathlib import Path
+
+app = Flask(__name__)
+
+DATA_PATH = Path(__file__).parent / "data" / "recipes.csv"
+
+def load_recipes():
+    try:
+        df = pd.read_csv(DATA_PATH)
+        # normalize strings
+        for col in ["diet", "cuisine", "allergens", "tags"]:
+            if col in df.columns:
+                df[col] = df[col].fillna("").str.lower()
+        return df
+    except Exception as e:
+        print("Failed to load recipes:", e)
+        return pd.DataFrame()
+
+def nutrition_score(row, goal):
+    """Simple heuristic score based on goal.
+    - weight_loss: prefer calories < 500 and protein >= 15g
+    - muscle_gain: prefer protein >= 25g and calories 400-800
+    - balanced: prefer calories 400-700 and protein 15-30g
+    """
+    cal = row.get("calories", 0) or 0
+    protein = row.get("protein_g", 0) or 0
+    fiber = row.get("fiber_g", 0) or 0
+
+    score = 0.0
+    if goal == "weight_loss":
+        score += 10 if cal <= 500 else 0
+        score += min(protein, 30) / 3
+        score += min(fiber, 15) / 3
+    elif goal == "muscle_gain":
+        score += 10 if (400 <= cal <= 800) else 0
+        score += min(protein, 50) / 2
+        score += min(fiber, 15) / 5
+    else:  # balanced
+        score += 10 if (400 <= cal <= 700) else 0
+        score += min(protein, 35) / 3
+        score += min(fiber, 15) / 3
+
+    return round(score, 2)
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    recipes = []
+    if request.method == "POST":
+        diet = request.form.get("diet", "").lower()
+        cuisine = request.form.get("cuisine", "").lower()
+        goal = request.form.get("goal", "balanced").lower()
+        exclude = request.form.get("exclude", "").lower()
+
+        df = load_recipes()
+
+        if diet:
+            df = df[df["diet"].str.contains(diet)]
+        if cuisine:
+            df = df[df["cuisine"].str.contains(cuisine)]
+        if exclude:
+            # exclude if any allergen substring appears
+            df = df[~df["allergens"].str.contains(exclude)]
+
+        # compute score
+        if not df.empty:
+            df = df.copy()
+            df["score"] = df.apply(lambda r: nutrition_score(r, goal), axis=1)
+            df = df.sort_values(by=["score", "protein_g", "fiber_g"], ascending=False)
+
+            # Convert to dicts for template
+            recipes = df.to_dict(orient="records")
+
+    return render_template("index.html", recipes=recipes)
+
+if __name__ == "__main__":
+    app.run(debug=True)
