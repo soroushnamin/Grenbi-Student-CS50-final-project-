@@ -1,4 +1,4 @@
-# Grenbi Lite (Student-First)
+# Grenbi Lite 
 **Author:** Soroush Aliasghari Namin  
 **GitHub:** [github.com/soroushnamin/grenbi-lite-student-first](https://github.com/soroushnamin/grenbi-lite-student-first)  
 **edX Username:** soroushnamin  
