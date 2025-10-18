@@ -1,45 +1,55 @@
-"""
-Grenbi Lite - CS50 Final Project
+nano app.py
+""""""
+Grenbi Lite (Student-First) — CS50 Final Project
 Author: Soroush Aliasghari Namin
-GitHub: soroushnamin
+GitHub: https://github.com/soroushnamin/grenbi-lite-student-first
 edX: soroushnamin
-City/Country: Istanbul, Turkey
-Date: 17/10/2025
+City/Country: Istanbul, Türkiye
+Date: <fill_on_recording_day>
 
-Notes on AI assistance:
-- Portions of this scaffold (project structure, boilerplate code, and comments) were assisted by ChatGPT in 2025.
-- All design, customization, dataset curation, and final implementation decisions were made by the author.
+Academic Honesty / AI Disclosure:
+- Scaffold ideas were assisted by ChatGPT (2025).
+- I (Soroush) implemented the core filtering, scoring, and ranking logic.
 """
 
 from flask import Flask, render_template, request
-import pandas as pd
 from pathlib import Path
+import csv
 
 app = Flask(__name__)
-
 DATA_PATH = Path(__file__).parent / "data" / "recipes.csv"
 
-def load_recipes():
-    try:
-        df = pd.read_csv(DATA_PATH)
-        # normalize strings
-        for col in ["diet", "cuisine", "allergens", "tags"]:
-            if col in df.columns:
-                df[col] = df[col].fillna("").str.lower()
-        return df
-    except Exception as e:
-        print("Failed to load recipes:", e)
-        return pd.DataFrame()
+# ---------- Data loading (pure Python) ----------
+def _load_raw_list():
+    rows = []
+    if not DATA_PATH.exists():
+        return rows
+    with open(DATA_PATH, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for r in reader:
+            # normalize and type-cast
+            r = {k: (v or "").strip() for k, v in r.items()}
+            for num in ("calories", "protein_g", "fiber_g"):
+                try:
+                    r[num] = float(r[num])
+                except Exception:
+                    r[num] = 0.0
+            for txt in ("diet", "cuisine", "allergens", "tags", "title", "summary"):
+                r[txt] = (r.get(txt, "") or "").lower()
+            rows.append(r)
+    return rows
 
-def nutrition_score(row, goal):
-    """Simple heuristic score based on goal.
-    - weight_loss: prefer calories < 500 and protein >= 15g
-    - muscle_gain: prefer protein >= 25g and calories 400-800
-    - balanced: prefer calories 400-700 and protein 15-30g
+# ---------- Core logic (YOUR work) ----------
+def nutrition_score(row: dict, goal: str) -> float:
     """
-    cal = row.get("calories", 0) or 0
-    protein = row.get("protein_g", 0) or 0
-    fiber = row.get("fiber_g", 0) or 0
+    Heuristic you can tweak and document:
+    - weight_loss: favor <=500 kcal, decent protein/fiber
+    - muscle_gain: favor 400–800 kcal, high protein
+    - balanced: favor 400–700 kcal, moderate protein/fiber
+    """
+    cal = row.get("calories", 0.0) or 0.0
+    protein = row.get("protein_g", 0.0) or 0.0
+    fiber = row.get("fiber_g", 0.0) or 0.0
 
     score = 0.0
     if goal == "weight_loss":
@@ -57,33 +67,38 @@ def nutrition_score(row, goal):
 
     return round(score, 2)
 
+def build_filtered_list(lst, *, diet: str, cuisine: str, exclude: str):
+    out = []
+    for r in lst:
+        if diet and diet not in r.get("diet", ""):
+            continue
+        if cuisine and cuisine not in r.get("cuisine", ""):
+            continue
+        if exclude and exclude in r.get("allergens", ""):
+            continue
+        out.append(r)
+    return out
+
+def rank_recipes(lst, goal: str):
+    # compute score, then sort by score, protein, fiber (desc)
+    for r in lst:
+        r["score"] = nutrition_score(r, goal)
+    return sorted(lst, key=lambda r: (r["score"], r.get("protein_g", 0), r.get("fiber_g", 0)), reverse=True)
+
+# ---------- Routes ----------
 @app.route("/", methods=["GET", "POST"])
 def index():
     recipes = []
     if request.method == "POST":
-        diet = request.form.get("diet", "").lower()
-        cuisine = request.form.get("cuisine", "").lower()
-        goal = request.form.get("goal", "balanced").lower()
-        exclude = request.form.get("exclude", "").lower()
+        diet = (request.form.get("diet") or "").lower().strip()
+        cuisine = (request.form.get("cuisine") or "").lower().strip()
+        goal = (request.form.get("goal") or "balanced").lower().strip()
+        exclude = (request.form.get("exclude") or "").lower().strip()
 
-        df = load_recipes()
-
-        if diet:
-            df = df[df["diet"].str.contains(diet)]
-        if cuisine:
-            df = df[df["cuisine"].str.contains(cuisine)]
-        if exclude:
-            # exclude if any allergen substring appears
-            df = df[~df["allergens"].str.contains(exclude)]
-
-        # compute score
-        if not df.empty:
-            df = df.copy()
-            df["score"] = df.apply(lambda r: nutrition_score(r, goal), axis=1)
-            df = df.sort_values(by=["score", "protein_g", "fiber_g"], ascending=False)
-
-            # Convert to dicts for template
-            recipes = df.to_dict(orient="records")
+        base = _load_raw_list()
+        filtered = build_filtered_list(base, diet=diet, cuisine=cuisine, exclude=exclude)
+        ranked = rank_recipes(filtered, goal)
+        recipes = ranked
 
     return render_template("index.html", recipes=recipes)
 
