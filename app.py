@@ -1,6 +1,6 @@
 nano app.py
 """"""
-Grenbi Lite (Student-First) — CS50 Final Project
+Grenbi Lite (Student-First),  CS50 Final Project
 Author: Soroush Aliasghari Namin
 GitHub: https://github.com/soroushnamin/grenbi-lite-student-first
 edX: soroushnamin
@@ -104,3 +104,19 @@ def index():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
