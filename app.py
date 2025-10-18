@@ -1,3 +1,16 @@
+"""
+Grenbi Lite (Student-First),  CS50 Final Project
+Author: Soroush Aliasghari Namin
+GitHub: https://github.com/soroushnamin/grenbi-lite-student-first
+edX: soroushnamin
+City/Country: Istanbul, Turkey
+Date: 17 October 2025
+
+Academic Honesty / AI Disclosure:
+- Scaffold ideas were assisted by ChatGPT (2025).
+- I (Soroush) implemented the core filtering, scoring, and ranking logic.
+"""
+
 from flask import Flask, render_template, request
 from pathlib import Path
 import csv
