@@ -1,17 +1,3 @@
-nano app.py
-""""""
-Grenbi Lite (Student-First),  CS50 Final Project
-Author: Soroush Aliasghari Namin
-GitHub: https://github.com/soroushnamin/grenbi-lite-student-first
-edX: soroushnamin
-City/Country: Istanbul, Türkiye
-Date: <fill_on_recording_day>
-
-Academic Honesty / AI Disclosure:
-- Scaffold ideas were assisted by ChatGPT (2025).
-- I (Soroush) implemented the core filtering, scoring, and ranking logic.
-"""
-
 from flask import Flask, render_template, request
 from pathlib import Path
 import csv
@@ -19,7 +5,6 @@ import csv
 app = Flask(__name__)
 DATA_PATH = Path(__file__).parent / "data" / "recipes.csv"
 
-# ---------- Data loading (pure Python) ----------
 def _load_raw_list():
     rows = []
     if not DATA_PATH.exists():
@@ -27,7 +12,6 @@ def _load_raw_list():
     with open(DATA_PATH, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for r in reader:
-            # normalize and type-cast
             r = {k: (v or "").strip() for k, v in r.items()}
             for num in ("calories", "protein_g", "fiber_g"):
                 try:
@@ -39,18 +23,10 @@ def _load_raw_list():
             rows.append(r)
     return rows
 
-# ---------- Core logic (YOUR work) ----------
-def nutrition_score(row: dict, goal: str) -> float:
-    """
-    Heuristic you can tweak and document:
-    - weight_loss: favor <=500 kcal, decent protein/fiber
-    - muscle_gain: favor 400–800 kcal, high protein
-    - balanced: favor 400–700 kcal, moderate protein/fiber
-    """
+def nutrition_score(row, goal):
     cal = row.get("calories", 0.0) or 0.0
     protein = row.get("protein_g", 0.0) or 0.0
     fiber = row.get("fiber_g", 0.0) or 0.0
-
     score = 0.0
     if goal == "weight_loss":
         score += 10 if cal <= 500 else 0
@@ -60,14 +36,13 @@ def nutrition_score(row: dict, goal: str) -> float:
         score += 10 if (400 <= cal <= 800) else 0
         score += min(protein, 50) / 2
         score += min(fiber, 15) / 5
-    else:  # balanced
+    else:
         score += 10 if (400 <= cal <= 700) else 0
         score += min(protein, 35) / 3
         score += min(fiber, 15) / 3
-
     return round(score, 2)
 
-def build_filtered_list(lst, *, diet: str, cuisine: str, exclude: str):
+def build_filtered_list(lst, *, diet, cuisine, exclude):
     out = []
     for r in lst:
         if diet and diet not in r.get("diet", ""):
@@ -79,13 +54,11 @@ def build_filtered_list(lst, *, diet: str, cuisine: str, exclude: str):
         out.append(r)
     return out
 
-def rank_recipes(lst, goal: str):
-    # compute score, then sort by score, protein, fiber (desc)
+def rank_recipes(lst, goal):
     for r in lst:
         r["score"] = nutrition_score(r, goal)
     return sorted(lst, key=lambda r: (r["score"], r.get("protein_g", 0), r.get("fiber_g", 0)), reverse=True)
 
-# ---------- Routes ----------
 @app.route("/", methods=["GET", "POST"])
 def index():
     recipes = []
@@ -94,12 +67,9 @@ def index():
         cuisine = (request.form.get("cuisine") or "").lower().strip()
         goal = (request.form.get("goal") or "balanced").lower().strip()
         exclude = (request.form.get("exclude") or "").lower().strip()
-
         base = _load_raw_list()
         filtered = build_filtered_list(base, diet=diet, cuisine=cuisine, exclude=exclude)
-        ranked = rank_recipes(filtered, goal)
-        recipes = ranked
-
+        recipes = rank_recipes(filtered, goal)
     return render_template("index.html", recipes=recipes)
 
 if __name__ == "__main__":
