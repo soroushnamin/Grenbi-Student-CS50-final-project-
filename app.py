@@ -6,9 +6,7 @@ edX: soroushnamin
 City/Country: Istanbul, Turkey
 Date: 17/10/2025
 
-Notes on AI assistance:
-- Portions of this scaffold (project structure, boilerplate code, and comments) were assisted by ChatGPT in 2025.
-- All 
+"""
 
 from flask import Flask, render_template, request
 from pathlib import Path
