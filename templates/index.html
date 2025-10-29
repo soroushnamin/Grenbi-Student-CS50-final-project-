@@ -6,11 +6,14 @@
     <title>Grenbi Lite — CS50 Final Project</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
-  <body>
-    <main class="container">
-      <h1>Grenbi Lite</h1>
-      <p class="subtitle">Personalized vegetarian & vegan recipe suggestions (demo)</p>
 
+  <!-- Sticky footer layout so the message stays at the bottom -->
+  <body style="min-height:100vh; display:flex; flex-direction:column;">
+    <main class="container" style="flex:1;">
+      <h1>Grenbi Lite</h1>
+      <p class="subtitle">Personalized vegetarian &amp; vegan recipe suggestions (demo)</p>
+
+      <!-- Search Form -->
       <form method="POST" class="card">
         <label>Diet
           <select name="diet">
@@ -28,15 +31,37 @@
           </select>
         </label>
 
-        <label>Cuisine
-          <select name="cuisine">
-            <option value="">Any</option>
-            <option value="turkish">Turkish</option>
-            <option value="indian">Indian</option>
-            <option value="italian">Italian</option>
-            <option value="asian">Asian</option>
-          </select>
-        </label>
+        <label>Culture / Cuisine
+  <select name="cuisine">
+    <option value="">Any</option>
+    <!-- Family buckets -->
+    <option value="mediterranean">Mediterranean</option>
+    <option value="asian">Asian</option>
+    <option value="middle eastern">Middle Eastern</option>
+    <option value="latin american">Latin American</option>
+    <!-- Specific cuisines -->
+    <option value="persian">Persian</option>
+    <option value="greek">Greek</option>
+    <option value="japanese">Japanese</option>
+    <option value="korean">Korean</option>
+    <option value="chinese">Chinese</option>
+    <option value="thai">Thai</option>
+    <option value="vietnamese">Vietnamese</option>
+    <option value="turkish">Turkish</option>
+    <option value="indian">Indian</option>
+    <option value="italian">Italian</option>
+    <option value="spanish">Spanish</option>
+    <option value="mexican">Mexican</option>
+    <option value="peruvian">Peruvian</option>
+    <option value="brazilian">Brazilian</option>
+    <option value="argentinian">Argentinian</option>
+    <option value="french">French</option>
+    <option value="german">German</option>
+    <option value="british">British</option>
+    <option value="american">American</option>
+  </select>
+</label>
+
 
         <label>Exclude (allergens / dislikes)
           <input type="text" name="exclude" placeholder="e.g., gluten, peanut, soy">
@@ -45,32 +70,57 @@
         <button type="submit">Find Recipes</button>
       </form>
 
+      <!-- RESULTS -->
       {% if recipes %}
-      <section class="results">
-        <h2>Recommendations</h2>
-        {% for r in recipes[:12] %}
-          <article class="recipe card">
-            <h3>{{ r["title"] }}</h3>
-            <p class="muted">{{ r["diet"]|title }} • {{ r["cuisine"]|title }}</p>
-            <ul class="facts">
-              <li>Calories: {{ r["calories"] }}</li>
-              <li>Protein: {{ r["protein_g"] }} g</li>
-              <li>Fiber: {{ r["fiber_g"] }} g</li>
-              <li>Score: {{ r["score"] }}</li>
-            </ul>
-            <p>{{ r["summary"] }}</p>
-            <p class="muted">Allergens: {{ r["allergens"] or "None" }}</p>
-            {% if r["url"] %}
-            <p><a href="{{ r["url"] }}" target="_blank" rel="noopener">View Recipe</a></p>
-            {% endif %}
-          </article>
-        {% endfor %}
-      </section>
-      {% endif %}
+        <!-- Quick coverage line (optional; helps you verify cuisines are present) -->
+        <p class="muted" style="margin:8px 0;">
+          Showing {{ recipes|length }} results
+        </p>
 
-      {% if not recipes %}
-      <p class="muted">Use the form above to get personalized suggestions.</p>
+        <section class="results">
+          <h2>Recommendations</h2>
+
+          {% for r in recipes %}
+            <article class="recipe card">
+              <h3>{{ r["title"] }}</h3>
+              <p class="muted">
+                {{ (r["diet"] or "")|title }}
+                {% if r["diet"] and r["cuisine"] %} • {% endif %}
+                {{ (r["cuisine"] or "")|title }}
+              </p>
+
+              <ul class="facts">
+                <li>Calories: {{ r["calories"] }}</li>
+                <li>Protein: {{ r["protein_g"] }} g</li>
+                <li>Fiber: {{ r["fiber_g"] }} g</li>
+                <li>Score: {{ r["score"] }}</li>
+              </ul>
+
+              {% if r["summary"] %}
+                <p>{{ r["summary"] }}</p>
+              {% endif %}
+
+              <p class="muted">
+                Allergens: {{ r["allergens"] or "None" }}
+              </p>
+
+              {% if r["url"] %}
+                <p><a href="{{ r["url"] }}" target="_blank" rel="noopener">View Recipe</a></p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </section>
+      {% else %}
+        <p class="muted">Use the form above to get personalized suggestions.</p>
       {% endif %}
     </main>
+
+    <!-- Bottom message (always at the bottom) -->
+    <footer style="padding:16px; border-top:1px solid #eee; text-align:center;">
+      Full recipe and personalized plans available at
+      <a href="https://grenbi.com" target="_blank" rel="noopener" style="font-weight:600;">
+        Grenbi.com
+      </a>
+    </footer>
   </body>
 </html>
